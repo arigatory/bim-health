@@ -5,6 +5,7 @@ betterlogging
 tinydb   
 pandas
 openpyxl
+psycopg2-binary
 
 # # For enabling api:
 # backoff
