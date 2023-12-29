@@ -1,7 +1,6 @@
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
-from infrastructure import db
 from infrastructure import postgres
 
 from tgbot.keyboards.inline import simple_menu_keyboard
@@ -49,7 +48,7 @@ async def write_recover(query: CallbackQuery):
     nickname = query.from_user.username
     health_status = "Почти выздоровел"
     postgres.insert_data(user_id, nickname, health_status)
-    
+
     await query.answer()
     await query.message.answer("Вирус может быть коварен, не переставайте лечиться!")
     await query.message.answer("Если что-то поменяется, можете в любое время поменять свой статус:",
