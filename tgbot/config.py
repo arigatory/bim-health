@@ -28,7 +28,7 @@ class DbConfig:
     password: str
     user: str
     database: str
-    port: int = 5432
+    port: int = 5439
 
     # For SQLAlchemy
     def construct_sqlalchemy_url(self, driver="asyncpg", host=None, port=None) -> str:
@@ -61,7 +61,7 @@ class DbConfig:
         password = env.str("POSTGRES_PASSWORD")
         user = env.str("POSTGRES_USER")
         database = env.str("POSTGRES_DB")
-        port = env.int("DB_PORT", 5432)
+        port = env.int("DB_PORT", 5439)
         return DbConfig(
             host=host, password=password, user=user, database=database, port=port
         )
@@ -187,7 +187,7 @@ def load_config(path: str = None) -> Config:
 
     return Config(
         tg_bot=TgBot.from_env(env),
-        # db=DbConfig.from_env(env),
+        db=DbConfig.from_env(env),
         # redis=RedisConfig.from_env(env),
         misc=Miscellaneous(),
     )

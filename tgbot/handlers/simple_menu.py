@@ -1,11 +1,8 @@
 from aiogram import Router, F
-from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
-from aiogram.utils.formatting import as_section, as_key_value, as_marked_list
 
-from tgbot.keyboards.inline import simple_menu_keyboard, my_orders_keyboard, \
-    OrderCallbackData
+from tgbot.keyboards.inline import simple_menu_keyboard
 
 menu_router = Router()
 
@@ -25,25 +22,18 @@ async def write_healthy(query: CallbackQuery):
     # Этот метод отправит ответ на сообщение с кнопкой, которую нажал пользователь
     # Здесь query - это объект CallbackQuery, который содержит message: Message object
     await query.message.answer("Вы здоровы, это прекрасно!")
-    await query.message.answer("Если что-то поменяется, можете в любое время поменять свой статус:", 
+    await query.message.answer("Если что-то поменяется, можете в любое время поменять свой статус:",
                                reply_markup=simple_menu_keyboard())
 
     # Вы также можете отредактировать сообщение с новым текстом
     # await query.message.edit_text("Вы выбрали создание заказа!")
-
-# Давайте создадим простой список заказов для демонстрации
-ORDERS = [
-    {"id": 1, "title": "Заказ 1", "status": "В процессе выполнения"},
-    {"id": 2, "title": "Заказ 2", "status": "Выполнен"},
-    {"id": 3, "title": "Заказ 3", "status": "Выполнен"},
-]
 
 
 @menu_router.callback_query(F.data == "ill")
 async def write_ill(query: CallbackQuery):
     await query.answer()
     await query.message.answer("Как жаль, что вы заболели... Поскорее выздоравливайте! Держите в курсе руководителя относительно текущего состояния")
-    await query.message.answer("Если что-то поменяется, можете в любое время поменять свой статус:", 
+    await query.message.answer("Если что-то поменяется, можете в любое время поменять свой статус:",
                                reply_markup=simple_menu_keyboard())
 
     # await query.message.edit_text("Вы выбрали просмотр ваших заказов.",
@@ -54,39 +44,5 @@ async def write_ill(query: CallbackQuery):
 async def write_recover(query: CallbackQuery):
     await query.answer()
     await query.message.answer("Вирус может быть коварен, не переставайте лечиться!")
-    await query.message.answer("Если что-то поменяется, можете в любое время поменять свой статус:", 
+    await query.message.answer("Если что-то поменяется, можете в любое время поменять свой статус:",
                                reply_markup=simple_menu_keyboard())
-
-# Для фильтрации callback-данных, созданных с использованием фабрики CallbackData, вы можете использовать метод .filter()
-@menu_router.callback_query(OrderCallbackData.filter())
-async def show_order(query: CallbackQuery, callback_data: OrderCallbackData):
-    await query.answer()
-
-    # Вы можете получить данные из объекта callback_data в виде атрибутов
-    order_id = callback_data.order_id
-
-    # Затем вы можете получить заказ из вашей базы данных (здесь мы используем простой список)
-    order_info = next(
-        (order for order in ORDERS if order["id"] == order_id), None)
-
-    if order_info:
-        # Здесь мы используем aiogram.utils.formatting для форматирования текста
-        # https://docs.aiogram.dev/en/latest/utils/formatting.html
-        text = as_section(
-            as_key_value("Заказ #", order_info["id"]),
-            as_marked_list(
-                as_key_value("Товар", order_info["title"]),
-                as_key_value("Статус", order_info["status"]),
-            ),
-        )
-        # Пример:
-        # Заказ #: 2
-        # - Товар: Заказ 2
-        # - Статус: Выполнен
-
-        await query.message.edit_text(text.as_html(), parse_mode=ParseMode.HTML)
-
-        # Вы также можете использовать MarkdownV2:
-        # await query.message.edit_text(text.as_markdown(), parse_mode=ParseMode.MARKDOWN_V2)
-    else:
-        await query.message.edit_text("Заказ не найден!")
