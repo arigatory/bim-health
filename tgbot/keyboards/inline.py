@@ -3,13 +3,13 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
-# This is a simple keyboard, that contains 2 buttons
+# Это простая клавиатура, содержащая 2 кнопки
 def very_simple_keyboard():
     buttons = [
         [
-            InlineKeyboardButton(text="📝 Створити замовлення",
+            InlineKeyboardButton(text="📝 Создать заказ",
                                  callback_data="create_order"),
-            InlineKeyboardButton(text="📋 Мої замовлення", callback_data="my_orders"),
+            InlineKeyboardButton(text="📋 Мои заказы", callback_data="my_orders"),
         ],
     ]
 
@@ -19,54 +19,54 @@ def very_simple_keyboard():
     return keyboard
 
 
-# This is the same keyboard, but created with InlineKeyboardBuilder (preferred way)
+# Та же клавиатура, но созданная с использованием InlineKeyboardBuilder (предпочтительный способ)
 def simple_menu_keyboard():
-    # First, you should create an InlineKeyboardBuilder object
+    # Сначала создайте объект InlineKeyboardBuilder
     keyboard = InlineKeyboardBuilder()
 
-    # You can use keyboard.button() method to add buttons, then enter text and callback_data
+    # Можно использовать метод keyboard.button() для добавления кнопок, затем введите текст и callback_data
     keyboard.button(
-        text="📝 Створити замовлення",
+        text="📝 Создать заказ",
         callback_data="create_order"
     )
     keyboard.button(
-        text="📋 Мої замовлення",
-        # In this simple example, we use a string as callback_data
+        text="📋 Мои заказы",
+        # В этом простом примере мы используем строку как callback_data
         callback_data="my_orders"
     )
 
-    # If needed you can use keyboard.adjust() method to change the number of buttons per row
+    # При необходимости можно использовать метод keyboard.adjust() для изменения количества кнопок в строке
     # keyboard.adjust(2)
 
-    # Then you should always call keyboard.as_markup() method to get a valid InlineKeyboardMarkup object
+    # Затем всегда нужно вызывать метод keyboard.as_markup(), чтобы получить действительный объект InlineKeyboardMarkup
     return keyboard.as_markup()
 
 
-# For a more advanced usage of callback_data, you can use the CallbackData factory
+# Для более сложного использования callback_data можно использовать фабрику CallbackData
 class OrderCallbackData(CallbackData, prefix="order"):
     """
-    This class represents a CallbackData object for orders.
+    Этот класс представляет собой объект CallbackData для заказов.
 
-    - When used in InlineKeyboardMarkup, you have to create an instance of this class, run .pack() method, and pass to callback_data parameter.
+    - При использовании в InlineKeyboardMarkup вы должны создать экземпляр этого класса, выполнить метод .pack() и передать его в параметр callback_data.
 
-    - When used in InlineKeyboardBuilder, you have to create an instance of this class and pass to callback_data parameter (without .pack() method).
+    - При использовании в InlineKeyboardBuilder вы должны создать экземпляр этого класса и передать его в параметр callback_data (без метода .pack()).
 
-    - In handlers you have to import this class and use it as a filter for callback query handlers, and then unpack callback_data parameter to get the data.
+    - В обработчиках вы должны импортировать этот класс и использовать его в качестве фильтра для обработчиков callback query, а затем распаковать параметр callback_data, чтобы получить данные.
 
-    # Example usage in simple_menu.py
+    # Пример использования в simple_menu.py
     """
     order_id: int
 
 
 def my_orders_keyboard(orders: list):
-    # Here we use a list of orders as a parameter (from simple_menu.py)
+    # Здесь мы используем список заказов в качестве параметра (из simple_menu.py)
 
     keyboard = InlineKeyboardBuilder()
     for order in orders:
         keyboard.button(
             text=f"📝 {order['title']}",
-            # Here we use an instance of OrderCallbackData class as callback_data parameter
-            # order id is the field in OrderCallbackData class, that we defined above
+            # Здесь мы используем экземпляр класса OrderCallbackData в качестве параметра callback_data
+            # order_id - это поле в классе OrderCallbackData, которое мы определили выше
             callback_data=OrderCallbackData(order_id=order["id"])
         )
 

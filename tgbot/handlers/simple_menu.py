@@ -9,70 +9,65 @@ from tgbot.keyboards.inline import simple_menu_keyboard, my_orders_keyboard, \
 
 menu_router = Router()
 
-
 @menu_router.message(Command("menu"))
 async def show_menu(message: Message):
-    await message.answer("Виберіть пункт меню:", reply_markup=simple_menu_keyboard())
+    await message.answer("Выберите пункт меню:", reply_markup=simple_menu_keyboard())
 
-
-# We can use F.data filter to filter callback queries by data field from CallbackQuery object
+# Мы можем использовать фильтр F.data для фильтрации callback-запросов по полю data из объекта CallbackQuery
 @menu_router.callback_query(F.data == "create_order")
 async def create_order(query: CallbackQuery):
-    # Firstly, always answer callback query (as Telegram API requires)
+    # В первую очередь всегда отвечаем на callback-запрос (как требует API Telegram)
     await query.answer()
 
-    # This method will send an answer to the message with the button, that user pressed
-    # Here query - is a CallbackQuery object, which contains message: Message object
-    await query.message.answer("Ви обрали створення замовлення!")
+    # Этот метод отправит ответ на сообщение с кнопкой, которую нажал пользователь
+    # Здесь query - это объект CallbackQuery, который содержит message: Message object
+    await query.message.answer("Вы выбрали создание заказа!")
 
-    # You can also Edit the message with a new text
-    # await query.message.edit_text("Ви обрали створення замовлення!")
+    # Вы также можете отредактировать сообщение с новым текстом
+    # await query.message.edit_text("Вы выбрали создание заказа!")
 
-
-# Let's create a simple list of orders for demonstration purposes
+# Давайте создадим простой список заказов для демонстрации
 ORDERS = [
-    {"id": 1, "title": "Замовлення 1", "status": "Виконується"},
-    {"id": 2, "title": "Замовлення 2", "status": "Виконано"},
-    {"id": 3, "title": "Замовлення 3", "status": "Виконано"},
+    {"id": 1, "title": "Заказ 1", "status": "В процессе выполнения"},
+    {"id": 2, "title": "Заказ 2", "status": "Выполнен"},
+    {"id": 3, "title": "Заказ 3", "status": "Выполнен"},
 ]
-
 
 @menu_router.callback_query(F.data == "my_orders")
 async def my_orders(query: CallbackQuery):
     await query.answer()
-    await query.message.edit_text("Ви обрали перегляд ваших замовлень!",
+    await query.message.edit_text("Вы выбрали просмотр ваших заказов.",
                                   reply_markup=my_orders_keyboard(ORDERS))
 
-
-# To filter the callback data, that was created with CallbackData factory, you can use .filter() method
+# Для фильтрации callback-данных, созданных с использованием фабрики CallbackData, вы можете использовать метод .filter()
 @menu_router.callback_query(OrderCallbackData.filter())
 async def show_order(query: CallbackQuery, callback_data: OrderCallbackData):
     await query.answer()
 
-    # You can get the data from callback_data object as attributes
+    # Вы можете получить данные из объекта callback_data в виде атрибутов
     order_id = callback_data.order_id
 
-    # Then you can get the order from your database (here we use a simple list)
+    # Затем вы можете получить заказ из вашей базы данных (здесь мы используем простой список)
     order_info = next((order for order in ORDERS if order["id"] == order_id), None)
 
     if order_info:
-        # Here we use aiogram.utils.formatting to format the text
+        # Здесь мы используем aiogram.utils.formatting для форматирования текста
         # https://docs.aiogram.dev/en/latest/utils/formatting.html
         text = as_section(
-            as_key_value("Замовлення #", order_info["id"]),
+            as_key_value("Заказ #", order_info["id"]),
             as_marked_list(
                 as_key_value("Товар", order_info["title"]),
                 as_key_value("Статус", order_info["status"]),
             ),
         )
-        # Example:
-        # Замовлення #: 2
-        # - Товар: Замовлення 2
-        # - Статус: Виконано
+        # Пример:
+        # Заказ #: 2
+        # - Товар: Заказ 2
+        # - Статус: Выполнен
 
         await query.message.edit_text(text.as_html(), parse_mode=ParseMode.HTML)
 
-        # You can also use MarkdownV2:
+        # Вы также можете использовать MarkdownV2:
         # await query.message.edit_text(text.as_markdown(), parse_mode=ParseMode.MARKDOWN_V2)
     else:
-        await query.message.edit_text("Замовлення не знайдено!")
+        await query.message.edit_text("Заказ не найден!")
