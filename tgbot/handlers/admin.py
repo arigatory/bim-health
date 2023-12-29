@@ -1,6 +1,7 @@
 from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.types import Message, FSInputFile
+from infrastructure.excel import make_report
 from tgbot.filters.admin import AdminFilter
 
 admin_router = Router()
@@ -15,5 +16,6 @@ async def admin_start(message: Message):
 @admin_router.message()
 async def excel_report(message: Message):
     # Генерируем Excel-файл
+    make_report()
     document = FSInputFile("Records.xlsx")
     await message.answer_document(document, caption="Ваш отчет по здоровью")

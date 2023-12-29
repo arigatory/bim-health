@@ -30,6 +30,7 @@ services:
    restart: always
    volumes:
      - pgdata:/var/lib/postgresql/data
+     - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
    command: "postgres -c max_connections=150
             -c shared_buffers=512MB -c effective_cache_size=1536MB
             -c maintenance_work_mem=128MB -c checkpoint_completion_target=0.9 -c wal_buffers=16MB
