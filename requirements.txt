@@ -2,6 +2,9 @@ aiogram~=3.0
 environs~=9.0
 redis
 betterlogging
+tinydb   
+pandas
+openpyxl
 
 # # For enabling api:
 # backoff
