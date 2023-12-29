@@ -7,7 +7,7 @@ echo_router = Router()
 
 @echo_router.message(F.text, StateFilter(None))
 async def bot_echo(message: types.Message):
-    text = ["Эхо без состояния.", "Сообщение:", message.text]
+    text = ["Эхо без состояния. Чтобы рассказать о своем здоровье отправь /health", "Сообщение:", message.text]
 
     await message.answer("\n".join(text))
 

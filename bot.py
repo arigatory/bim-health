@@ -18,13 +18,13 @@ async def on_startup(bot: Bot, admin_ids: list[int]):
 
 def register_global_middlewares(dp: Dispatcher, config: Config, session_pool=None):
     """
-    Register global middlewares for the given dispatcher.
-    Global middlewares here are the ones that are applied to all the handlers (you specify the type of update)
+    Регистрация глобальных middleware для указанного диспетчера.
+    Здесь глобальные middleware - это те, которые применяются ко всем обработчикам (вы указываете тип обновления)
 
-    :param dp: The dispatcher instance.
+    :param dp: Экземпляр диспетчера.
     :type dp: Dispatcher
-    :param config: The configuration object from the loaded configuration.
-    :param session_pool: Optional session pool object for the database using SQLAlchemy.
+    :param config: Объект конфигурации из загруженной конфигурации.
+    :param session_pool: Необязательный объект пула сессий для базы данных с использованием SQLAlchemy.
     :return: None
     """
     middleware_types = [
@@ -39,17 +39,17 @@ def register_global_middlewares(dp: Dispatcher, config: Config, session_pool=Non
 
 def setup_logging():
     """
-    Set up logging configuration for the application.
+    Настройка конфигурации логирования для приложения.
 
-    This method initializes the logging configuration for the application.
-    It sets the log level to INFO and configures a basic colorized log for
-    output. The log format includes the filename, line number, log level,
-    timestamp, logger name, and log message.
+    Этот метод инициализирует конфигурацию логирования для приложения.
+    Он устанавливает уровень журнала на INFO и настраивает основной цветной журнал для
+    вывода. Формат журнала включает имя файла, номер строки, уровень журнала,
+    отметку времени, имя логгера и сообщение журнала.
 
-    Returns:
+    Возвращает:
         None
 
-    Example usage:
+    Пример использования:
         setup_logging()
     """
     log_level = logging.INFO
@@ -60,18 +60,18 @@ def setup_logging():
         format="%(filename)s:%(lineno)d #%(levelname)-8s [%(asctime)s] - %(name)s - %(message)s",
     )
     logger = logging.getLogger(__name__)
-    logger.info("Starting bot")
+    logger.info("Запуск бота")
 
 
 def get_storage(config):
     """
-    Return storage based on the provided configuration.
+    Возвращает хранилище на основе предоставленной конфигурации.
 
     Args:
-        config (Config): The configuration object.
+        config (Config): Объект конфигурации.
 
     Returns:
-        Storage: The storage object based on the configuration.
+        Storage: Объект хранилища на основе конфигурации.
 
     """
     if config.tg_bot.use_redis:
@@ -104,4 +104,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
-        logging.error("Бот був вимкнений!")
+        logging.error("Бот был выключен!")
