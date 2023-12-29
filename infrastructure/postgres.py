@@ -73,14 +73,6 @@ def insert_test_data():
         # Очищаем таблицу в БД, чтобы загружать данные в пустую таблицу
         cursor.execute("""TRUNCATE user_records""")
 
-        # data = [('127551d6-2f7f-4b6b-bdb3-da19c98e1516',
-        #         '11', 'Ivan', random.choice(statuses), datetime.now()),
-        #         ('f80fdf12-0ff3-4875-9483-5f8d2593446a',
-        #         '12', 'Ivan', random.choice(statuses), datetime.now()),
-        #         ('002e18a2-b469-4ecc-836b-b18f9ce8df0d',
-        #         '13', 'Ivan', random.choice(statuses), datetime.now()),
-        #         ('af36613b-be73-4e85-8055-125e906a2a93',
-        #         '14', 'Ivan', random.choice(statuses), datetime.now())]
         args = ','.join(cursor.mogrify("(%s, %s, %s, %s, %s)",
                         item).decode() for item in data)
         cursor.execute(f"""            
@@ -88,5 +80,4 @@ def insert_test_data():
             VALUES {args}
             """)
 
-
-insert_test_data()
+# insert_test_data()

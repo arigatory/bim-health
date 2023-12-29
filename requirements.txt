@@ -6,6 +6,7 @@ tinydb
 pandas
 openpyxl
 psycopg2-binary
+xlsxwriter
 
 # # For enabling api:
 # backoff

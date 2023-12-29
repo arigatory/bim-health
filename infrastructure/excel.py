@@ -1,74 +1,62 @@
-# health_data_manager.py
-
-import pandas as pd
-from tinydb import TinyDB, Query
+import uuid
+import xlsxwriter
 from datetime import datetime
-
-db = TinyDB('health_data.json')
-
-
-def save_health_status(user_id, user_name, date, status):
-    data = {
-        "userId": user_id,
-        "userName": user_name,
-        "statuses": [
-            {
-                "date": date,
-                "status": status
-            }
-        ]
-    }
-    db.upsert(data, Query().userId == user_id)
+from dataclasses import dataclass
 
 
-def get_health_status(user_id):
-    query = Query().userId == user_id
-    result = db.get(query)
-    return result
+@dataclass
+class UserRecord:
+    id: uuid.UUID
+    telegramId: int
+    name: str
+    status: str
+    date: datetime
 
 
-def map_status(status):
-    status_mapping = {
-        "Healty": "Здоров",
-        "Ill": "Болен",
-        "Recover": "Выздоравливает"
-    }
-    return status_mapping.get(status, "Не ответил")
+# Sample data for UserRecord instances
+user_records = [
+    UserRecord(uuid.uuid4(), 123, 'John Doe', 'Active', datetime(2023, 1, 1)),
+    UserRecord(uuid.uuid4(), 456, 'Alice Smith',
+               'Inactive', datetime(2023, 1, 2)),
+    UserRecord(uuid.uuid4(), 789, 'Bob Johnson',
+               'Active', datetime(2023, 1, 1)),
+    UserRecord(uuid.uuid4(), 101, 'Eve Williams', '', datetime(2023, 1, 3)),
+    # Add more sample data as needed
+]
+
+# Extract unique dates and sort them
+unique_dates = sorted(set(record.date.date() for record in user_records))
+# Sort user records by name
+user_records.sort(key=lambda record: record.name)
+
+workbook = xlsxwriter.Workbook("Records.xlsx")
+worksheet = workbook.add_worksheet()
+
+# Define a format for the blue cells
+blue_format = workbook.add_format(
+    {'bg_color': '#0000FF', 'font_color': '#FFFFFF'})
 
 
-def generate_excel_file(output_filename='health_data.xlsx'):
-    users_data = db.all()
+# Write the header row with dates
+worksheet.write('A1', 'Name')
+for col_num, date in enumerate(unique_dates, start=1):
+    col_letter = chr(ord('A') + col_num)
+    worksheet.write(0, col_num, date.strftime('%Y-%m-%d'))
 
-    # Строим DataFrame из данных
-    df = pd.DataFrame(users_data)
+# Write user data to the worksheet
+for row_num, user_record in enumerate(user_records, start=1):
+    worksheet.write(row_num, 0, user_record.name)
 
-    # Разворачиваем статусы в отдельные столбцы с динамическими названиями дат
-    df = pd.concat([df.drop(['statuses'], axis=1),
-                   df['statuses'].apply(pd.Series)], axis=1)
+    for col_num, date in enumerate(unique_dates, start=1):
+        col_letter = chr(ord('A') + col_num)
+        status = next((record.status for record in user_records if record.date.date(
+        ) == date and record.name == user_record.name), 'NoData')
 
-    # Сортируем столбцы дат в порядке возрастания
-    df = df.sort_values(by=['userId']).sort_index(axis=1)
+        # Apply conditional formatting to cells with 'NoData'
+        if status == 'NoData':
+            worksheet.write(row_num, col_num, status, blue_format)
+        else:
+            worksheet.write(row_num, col_num, status)
 
-    # Применяем маппинг статусов
-    for column in df.columns[2:]:
-        df[column] = df[column].apply(map_status)
-
-    # Заполняем пропущенные значения "Не ответил"
-    df = df.fillna('Не ответил')
-
-    # Сохраняем DataFrame в Excel-файл
-    df.to_excel(output_filename, index=False, engine='openpyxl')
-    print(f"Excel-файл '{output_filename}' успешно создан.")
-
-
-if __name__ == "__main__":
-    # Пример использования:
-    user_id = 1
-    user_name = "Ivan"
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    health_status = "Healty"
-
-    save_health_status(user_id, user_name, current_date, health_status)
-
-    # Генерация Excel-файла
-    generate_excel_file()
+# Save the workbook and close it.
+workbook.close()

@@ -2,8 +2,6 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from infrastructure import db
-from aiogram.types import InputFile
-
 
 from tgbot.keyboards.inline import simple_menu_keyboard
 
@@ -81,11 +79,3 @@ async def write_recover(query: CallbackQuery):
     await query.message.answer("Вирус может быть коварен, не переставайте лечиться!")
     await query.message.answer("Если что-то поменяется, можете в любое время поменять свой статус:",
                                reply_markup=simple_menu_keyboard())
-
-
-@menu_router.message(Command("report"))
-async def excel_report(message: Message):
-    # Генерируем Excel-файл
-    db.generate_excel_file()
-    # Отправляем Excel-файл пользователю
-    await message.answer_document(document=InputFile("health_data.xlsx"), caption="Ваш отчет по здоровью")
