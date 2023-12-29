@@ -40,19 +40,52 @@ def get_health_status(user_id):
     return result
 
 
-if __name__ == "__main__":
-    # Пример использования:
-    user_id = 1
-    user_name = "Ivan"
-    current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-    health_status = "Healthy"
+def generate_excel_file(db_path='health_data.json', output_filename='health_data.xlsx'):
+    # Создаем пустой DataFrame
+    df = pd.DataFrame(columns=['userId', 'userName', 'date', 'status'])
 
-    save_health_status(user_id, user_name, current_date, health_status)
+    # Получаем данные из базы TinyDB
+    db = TinyDB(db_path)
+    data = db.all()
 
-    retrieved_health_status = get_health_status(user_id)
+    # Добавляем данные в DataFrame
+    for user_data in data:
+        user_id = user_data['userId']
+        user_name = user_data['userName']
+        statuses = user_data.get('statuses', [])
 
-    if retrieved_health_status:
-        print(
-            f"Health status for user {user_id} ({user_name}): {retrieved_health_status}")
-    else:
-        print(f"No health status found for user {user_id}")
+        # Если у пользователя есть статусы, берем последний статус за каждый день
+        if statuses:
+            latest_statuses = {}
+            for status in reversed(statuses):
+                date = datetime.strptime(
+                    status['date'], "%Y-%m-%d %H:%M:%S.%f").date()
+                if date not in latest_statuses:
+                    latest_statuses[date] = status
+            for date, latest_status in latest_statuses.items():
+                df = pd.concat([df, pd.DataFrame({'userId': [user_id], 'userName': [user_name], 'date': [date],
+                                                  'status': [latest_status['status']]}),], ignore_index=True)
+        else:
+            # Если у пользователя нет статусов, пишем "Нет ответа"
+            df = pd.concat([df, pd.DataFrame({'userId': [user_id], 'userName': [user_name],
+                                              'date': [datetime.now().date()], 'status': ['Нет ответа']}),], ignore_index=True)
+
+    # Переформатируем DataFrame
+    df = df.pivot(index=['userId', 'userName'],
+                  columns='date', values='status').reset_index()
+
+    # Сортируем столбцы (даты) в порядке возрастания
+    df = df.reindex(
+        sorted(df.columns[2:], key=lambda x: datetime.strptime(str(x), "%Y-%m-%d")), axis=1)
+
+    # Заполняем пропущенные значения "Нет ответа"
+    df = df.fillna('Нет ответа')
+
+    # Сохраняем DataFrame в Excel-файл
+    df.to_excel(output_filename, index=False, sheet_name='Sheet1')
+
+    print(f"Excel-файл '{output_filename}' успешно создан.")
+
+
+# Пример использования
+generate_excel_file()
