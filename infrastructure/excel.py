@@ -1,11 +1,21 @@
-import operator
 import xlsxwriter
-import pprint
-from .postgres import fetch_users_from_database
+from .postgres import fetch_names, fetch_users_from_database
 import itertools
 
 
 def make_report():
+    names_mappings = fetch_names()
+    # Create dictionaries
+    telegram_id_real_name_dict = {
+        record.telegram_id: record.real_name for record in names_mappings}
+
+    def get_real_name(tg_id):
+        # Attempt to get real name from the nickname_real_name_dict
+        if tg_id in telegram_id_real_name_dict:
+            return telegram_id_real_name_dict[tg_id]
+
+        return f"Unknown {tg_id}"
+
     # Sample data for UserRecord instances
     user_records = fetch_users_from_database()
 
@@ -13,7 +23,7 @@ def make_report():
     unique_dates = sorted(set(record.date.date() for record in user_records))
     # Sort user records by name
     user_records = sorted(
-        user_records, key=operator.attrgetter("name", "date"))
+        user_records, key=lambda x: get_real_name(x.telegramId))
 
     table = {}
     for record in user_records:
@@ -23,8 +33,8 @@ def make_report():
         date = record.date.date()
         table[record.telegramId][date] = record.status
 
-    pprint.pprint(table)
-    pprint.pprint(unique_dates)
+    # pprint.pprint(table)
+    # pprint.pprint(unique_dates)
     # pprint.pprint(user_records)
 
     workbook = xlsxwriter.Workbook("Records.xlsx")
@@ -46,7 +56,7 @@ def make_report():
     # Write user data to the worksheet
     for i, key in enumerate(table):
         # key - имя
-        worksheet.write(i+1, 0, key)
+        worksheet.write(i+1, 0, get_real_name(key), None)
 
         for j in range(len(unique_dates)):
             status = table[key].get(unique_dates[j], "Не ответил")
@@ -62,6 +72,8 @@ def make_report():
                 worksheet.write(i+1, j+1, status, green_format)
             else:
                 worksheet.write(i+1, j+1, status)
-
+                
+    # Autofit the worksheet.
+    worksheet.autofit()
     # Save the workbook and close it.
     workbook.close()

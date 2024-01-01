@@ -1,9 +1,7 @@
 aiogram~=3.0
 environs~=9.0
 redis
-betterlogging
-tinydb   
-pandas
+betterlogging 
 openpyxl
 psycopg2-binary
 xlsxwriter
